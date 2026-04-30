@@ -14,9 +14,6 @@ Visualizer::Visualizer(const SuperpixelParams & params, const rclcpp::Node::Shar
     fin_depth_img_pub_ = it.advertise("/superpixels/process_depth", 1);
     fin_depth_img_ptr_ = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
 
-    // fin_label_img_pub_ = it.advertise("/superpixels/process_labels", 1);
-    // fin_label_img_ptr_ = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
-
     fin_normal_img_pub_ = it.advertise("/superpixels/process_normals", 1);
     fin_normal_img_ptr_ = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
     fin_normal_img_colored_ptr_ = cv_bridge::CvImagePtr(new cv_bridge::CvImage);
@@ -130,12 +127,6 @@ void Visualizer::visualize(const cv::Mat & depth_image,
     cv::flip(depth_image, flipped_depth_image, 1); // flip horizontally
     fin_depth_img_ptr_->image = flipped_depth_image;
     fin_depth_img_pub_.publish(fin_depth_img_ptr_->toImageMsg());
-
-    // RCLCPP_INFO_STREAM(node_->get_logger(), "       Preparing final label image");
-    // fin_label_img_ptr_->header = raw_label_img_ptr->header;
-    // fin_label_img_ptr_->encoding = raw_label_img_ptr->encoding;
-    // fin_label_img_ptr_->image = label_image;
-    // fin_label_img_pub_->publish(fin_label_img_ptr_->toImageMsg());
 
     // RCLCPP_INFO_STREAM(node_->get_logger(), "       Preparing final normal image");
     // fin_normal_img_ptr_->header = raw_normal_img_ptr->header;
@@ -288,7 +279,6 @@ void Visualizer::publishPlanarRegions(const cv::Mat & raw_depth_image,
             convexHullPt = superpixel_convex_hulls[i][j];
 
             // normal polygon
-            // polygon.container().emplace_back(convexHullPt[0], convexHullPt[1]);
             // RCLCPP_INFO_STREAM(node_->get_logger(), "           point " << j << ": " << polygon.container()[j].x() << ", " << polygon.container()[j].y());
 
             // inflated polygon
@@ -326,45 +316,12 @@ void Visualizer::publishPlanarRegions(const cv::Mat & raw_depth_image,
         region.bbox2d = boundaryWithInset.boundary.outer_boundary().bbox();
 
         region_msg = convex_plane_decomposition::toMessage(region);
-        // cv::Scalar color = colors_[i];
-        std_msgs::msg::ColorRGBA region_color;
-        // region_color.r = color[2] / 255.0;
-        // region_color.g = color[1] / 255.0;
-        // region_color.b = color[0] / 255.0;
-        // region_color.r = 0.0;
-        // region_color.g = 0.0;
-        // region_color.b = 0.0;
-        // region_color.a = 1.0;
-        // region_msg.color = region_color;
-
         terrain_msg.planar_regions.push_back(region_msg);
 
         // RCLCPP_INFO_STREAM(node_->get_logger(), "   e0: " << e0.transpose());
         // RCLCPP_INFO_STREAM(node_->get_logger(), "   e1: " << e1.transpose());
         // RCLCPP_INFO_STREAM(node_->get_logger(), "   normal: " << normal.transpose());
     }    
-
-    /* Only compare to pixels in a 2 x step by 2 x step region. */
-    // grid_map::GridMap map({"elevation"});
-    // map.setFrameId("odom");
-    // map.setGeometry(grid_map::Length(1.2, 2.0), 0.03);
-
-    // rclcpp::Time time = node_->now();
-    // for (grid_map::GridMapIterator it(map); !it.isPastEnd(); ++it) 
-    // {
-    //   grid_map::Position position;
-    //   map.getPosition(*it, position);
-    //   map.at(
-    //     "elevation",
-    //     *it) = -0.04 + 0.2 * std::sin(3.0 * time.seconds() + 5.0 * position.y()) * position.x();
-    // }
-
-    // // Publish grid map.
-    // map.setTimestamp(time.nanoseconds());
-    // std::unique_ptr<grid_map_msgs::msg::GridMap> message;
-    // message = grid_map::GridMapRosConverter::toMessage(map);
-    // elevationMapPublisher_->publish(std::move(message));
-
 
     grid_map::GridMap map({"elevation"});
     map.setFrameId({"odom"}); // needs to be odom
@@ -380,7 +337,6 @@ void Visualizer::publishPlanarRegions(const cv::Mat & raw_depth_image,
     cv::Vec3f egocanPt;
     Eigen::Vector3d egocanEigenPt;
     Eigen::Vector3d worldPt;
-    // Eigen::Vector3d egocanStabilizedPt;
     cv::Point current;
     float depth;
 
@@ -431,59 +387,12 @@ void Visualizer::publishPlanarRegions(const cv::Mat & raw_depth_image,
     // preprocess layer
     preprocessing_.preprocess(map, "elevation");
 
-    // add inpaint layer
-    // map.add("inpaint", 0.0);
-
     map.setTimestamp(time.nanoseconds());
     std::unique_ptr<grid_map_msgs::msg::GridMap> message;
     message = grid_map::GridMapRosConverter::toMessage(map);
     elevationMapPublisher_->publish(std::move(message));
 
-    // const std::string elevationLayer{"elevation"};
-    // const std::string frameId = "egocan_stabilized"; // need to stabilized?
-    // const float resolution = 0.01; // what is this?
-    // const float heightScale = 0.01; // what is this?
-    // auto imageGridMap = convex_plane_decomposition::loadGridmapFromImage(depth_image, 
-    //                                                                         elevationLayer, 
-    //                                                                         frameId,
-    //                                                                         resolution, 
-    //                                                                         heightScale);
-    // grid_map_msgs::msg::GridMap image_grid_map_msg = *grid_map::GridMapRosConverter::toMessage(imageGridMap);
-    // elevationMapPublisher_->publish(image_grid_map_msg);
-
-    // const std::string ocs2_anymal = "/home/masselmeier3/ros2_ws/src/ocs2/ocs2_robotic_examples/ocs2_perceptive_quadruped/anymal/";
-    // const std::string terrainFolder = ocs2_anymal + "ocs2_anymal_loopshaping_mpc/data/";
-    // std::string terrainFile = "step.png";
-
-    // const std::string elevationLayer{"elevation"};
-    // const std::string frameId{"odom"};
-    // const float resolution = 0.04; // what is this?
-    // const float heightScale = 0.35; // what is this?
-    // auto gridMap = convex_plane_decomposition::loadGridmapFromImage(
-    //     terrainFolder + "/" + terrainFile, elevationLayer, frameId,
-    //     resolution, heightScale);
-    // gridMap.get(elevationLayer).array() -=
-    //     gridMap.atPosition(elevationLayer, {0., 0.});    
-
-    // grid_map_msgs::msg::GridMap elevationMapMessage =
-    //     *(grid_map::GridMapRosConverter::toMessage(gridMap));
-    // elevationMapPublisher_->publish(elevationMapMessage);
-
-    // placeholder gridMap
-    // grid_map::GridMap grid_map;
-    // grid_map::Length grid_map_dimensions(1.0, 1.0); // lengths in x,y directions [m]
-    // double grid_map_resolution = 0.1; // resolution [m]
-    // grid_map::Position grid_map_origin(0.0, 0.0); // origin [m]
-    // grid_map.setGeometry(grid_map_dimensions, 
-    //                         grid_map_resolution, 
-    //                         grid_map_origin);
-    // grid_map.add("elevation", 0.0); // add layer with value to initialize to everywhere'
-    // grid_map.setFrameId("odom");
-
-    // grid_map_msgs::msg::GridMap grid_map_msg;
-    // grid_map_msg = *grid_map::GridMapRosConverter::toMessage(grid_map);
     terrain_msg.gridmap = *grid_map::GridMapRosConverter::toMessage(map);
-
     terrainPub_->publish(terrain_msg);
 
     visualizePlanarRegions(terrain_msg);
@@ -568,8 +477,6 @@ void Visualizer::colorClusters(const cv::Mat & color_depth_image,
     {
         for (int c = 0; c < color_depth_image.cols; c++)
         {    
-            // if (isPixelValid(depth_image, label_image, normal_image, current)) 
-
             int cluster_id = clusters.at<int>(r, c);
             if (cluster_id != -1)
             {

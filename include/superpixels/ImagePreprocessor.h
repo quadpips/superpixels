@@ -33,7 +33,6 @@ class ImagePreprocessor
                                 cv::Mat & preprocessed_depth_img,
                                 cv::Mat & preprocessed_normal_img);
 
-        // const cv_bridge::CvImagePtr & raw_depth_img_ptr
         void fillInImage(const cv::Mat & cleaned_depth_img,
                             const cv::Mat & cleaned_normal_img,
                             const cv::Mat & visited,

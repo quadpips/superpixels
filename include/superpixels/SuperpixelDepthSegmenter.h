@@ -45,39 +45,31 @@ class SuperpixelDepthSegmenter
         /////////////
         void run();
 
-        void log();
-
         void visualize();
 
     private:
         rcl_interfaces::msg::SetParametersResult parametersCallback(const std::vector<rclcpp::Parameter> &parameters);
 
         void reset_data(const cv::Mat & depth_image,
-                        // const cv::Mat & label_image,
                         const cv::Mat & normal_image);
 
         void init_data(const cv::Mat & depth_image,
-                        // const cv::Mat & label_image,
                         const cv::Mat & normal_image);
 
         cv::Point findLocalMinimum(const cv::Mat & depth_image, 
-                                    // const cv::Mat & label_image,
                                     const cv::Mat & normal_image,
                                     const cv::Point & og_center);
 
         void generateSuperpixels(const cv::Mat & depth_image,
-                                    // const cv::Mat & label_image,
                                     const cv::Mat & normal_image);
 
         bool checkConstraints(const int & center_idx, 
                                 const float & depth,
-                                // const uint8_t & label,
                                 const cv::Vec3f & normal,
                                 const cv::Point & pixel);
 
         double computeDistance(const int & center_idx, 
                                 const float & depth,
-                                // const uint8_t & label,
                                 const cv::Vec3f & normal,
                                 const cv::Point & pixel);
 
@@ -91,49 +83,38 @@ class SuperpixelDepthSegmenter
 
         bool notReceivedDepthImage();
 
-        // bool notReceivedLabelImage();
-
         bool notReceivedNormalImage();
 
         void allImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& depth_image_msg, 
-                                // const sensor_msgs::ImageConstPtr& label_image_msg, 
                                 const sensor_msgs::msg::Image::ConstSharedPtr& normal_image_ms);
 
         cv::Point findCentroid(const cv::Mat & depth_image, 
-                                // const cv::Mat & label_image,
                                 const cv::Mat & normal_image,
                                 const cv::Point & og_center);
 
         cv::Point findClosestPixel(const int & center_idx,
                                     const cv::Point & center, 
                                     const cv::Mat & depth_image,
-                                    // const cv::Mat & label_image,
                                     const cv::Mat & normal_image);
 
-        // ros::NodeHandle nh_;
         rclcpp::Node::SharedPtr node_;
         
         // Subscribers
 
         image_transport::SubscriberFilter raw_depth_img_sub_; 
-        // image_transport::SubscriberFilter raw_label_img_sub_;
         image_transport::SubscriberFilter raw_normal_img_sub_;
 
         // Image message pointers
         sensor_msgs::msg::Image::ConstSharedPtr raw_depth_img_msg_ = nullptr;
-        // sensor_msgs::ImageConstPtr raw_label_img_msg_ = nullptr;
         sensor_msgs::msg::Image::ConstSharedPtr raw_normal_img_msg_ = nullptr;
 
         std::string depth_img_topic_ = "";
-        // std::string label_img_topic_;
         std::string normal_img_topic_ = "";
 
         // Image pointers
         cv_bridge::CvImagePtr raw_depth_img_ptr_ = nullptr;
-        // cv_bridge::CvImagePtr raw_label_img_ptr_ = nullptr;
         cv_bridge::CvImagePtr raw_normal_img_ptr_ = nullptr;
         cv_bridge::CvImagePtr prop_depth_img_ptr_ = nullptr;
-        // cv_bridge::CvImagePtr prop_label_img_ptr_ = nullptr;
         cv_bridge::CvImagePtr prop_normal_img_ptr_ = nullptr;
 
         // Synchronizer
@@ -162,44 +143,11 @@ class SuperpixelDepthSegmenter
         std::vector<Eigen::Matrix3d> egocan_to_region_rotations_ = {}; // Superpixel rotations
 
         cv::Mat preprocessed_depth_img = cv::Mat();
-        cv::Mat preprocessed_normal_img = cv::Mat(); // preprocessed_label_img, 
+        cv::Mat preprocessed_normal_img = cv::Mat();
 
         SuperpixelParams params_;
 
         geometry_msgs::msg::TransformStamped egocanFrameToOdomFrame = geometry_msgs::msg::TransformStamped();
-
-        std::chrono::steady_clock::time_point totalBegin, totalEnd;
-        float totalTimeTaken = 0.0;
-        int numberOfTotalCalls = 0;
-
-        std::chrono::steady_clock::time_point cleanBegin, cleanEnd;
-        float cleanTimeTaken = 0.0;
-        int numberOfCleanCalls = 0;
-
-        std::chrono::steady_clock::time_point fillBegin, fillEnd;
-        float fillTimeTaken = 0.0;
-        int numberOfFillCalls = 0;
-
-        std::chrono::steady_clock::time_point preprocessBegin, preprocessEnd;
-        float preprocessTimeTaken = 0.0;
-        int numberOfPreprocessCalls = 0;
-
-        std::chrono::steady_clock::time_point superpixelBegin, superpixelEnd;
-        float superpixelTimeTaken = 0.0;
-        int numberOfSuperpixelCalls = 0;
-
-        std::chrono::steady_clock::time_point ransacBegin, ransacEnd;
-        float ransacTimeTaken = 0.0;
-        int numberOfRansacCalls = 0;
-
-        std::chrono::steady_clock::time_point convexHullBegin, convexHullEnd;
-        float convexHullTimeTaken = 0.0;
-        int numberOfConvexHullCalls = 0;
-
-        std::chrono::steady_clock::time_point initTime;
-
-        // std::chrono::steady_clock::time_point regionSplitBegin, regionSplitEnd;
-        // std::chrono::steady_clock::time_point visBegin, visEnd;
 
         std::shared_ptr<tf2_ros::TransformListener> tfListener_{nullptr};
         std::unique_ptr<tf2_ros::Buffer> tfBuffer_{nullptr};

@@ -33,7 +33,7 @@ void ImagePreprocessor::cleanImages(const cv::Mat & raw_depth_img,
     {
         for (int c = 0; c < cleaned_depth_img.cols; c++)
         {
-            if (isPixelValid(raw_depth_img, raw_normal_img, cv::Point(c, r), params_.k_c_)) // raw_label_img, 
+            if (isPixelValid(raw_depth_img, raw_normal_img, cv::Point(c, r), params_.k_c_))
             {
 
                 float depth = raw_depth_img.at<float>(r, c);
@@ -45,17 +45,13 @@ void ImagePreprocessor::cleanImages(const cv::Mat & raw_depth_img,
                 // bool valid_normal = (!std::isnan(normal.val[0]) && !std::isnan(normal.val[1]) && !std::isnan(normal.val[2]) && 
                                         // cv::norm(normal) > DELTA);
 
-                // if (valid_depth && valid_label && valid_normal)
-                // {
+
                 cleaned_depth_img.at<float>(r, c) = depth;
-                // cleaned_label_img.at<uint8_t>(r, c) = label;
                 cleaned_normal_img.at<cv::Vec3f>(r, c) = normal;
                 visited.at<uint8_t>(r, c) = 1;
-                // } 
             } else
             {
                 cleaned_depth_img.at<float>(r, c) = 0;
-                // cleaned_label_img.at<uint8_t>(r, c) = 0;
                 cleaned_normal_img.at<cv::Vec3f>(r, c) = cv::Vec3f(0, 0, 0);
             }
 
@@ -75,22 +71,6 @@ void ImagePreprocessor::cleanImages(const cv::Mat & raw_depth_img,
             // }
     //     }
     // }    
-
-    // RCLCPP_INFO_STREAM(node_->get_logger(), "       Checking label image ...");
-
-    // for (int r = 0; r < cleaned_label_img.rows; r++)
-    // {
-    //     for (int c = 0; c < cleaned_label_img.cols; c++)
-    //     {
-
-            // if (std::isnan(label))
-            //     cleaned_label_img.at<uint8_t>(r, c) = 0;
-            // else if (label < 0)
-            //     cleaned_label_img.at<uint8_t>(r, c) = 0;
-            // else
-            //     cleaned_label_img.at<uint8_t>(r, c) = label;
-    //     }
-    // }
 
     // RCLCPP_INFO_STREAM(node_->get_logger(), "       Checking normal image ...");
 
@@ -113,7 +93,6 @@ void ImagePreprocessor::cleanImages(const cv::Mat & raw_depth_img,
 
 
 void ImagePreprocessor::healthCheck(const cv::Mat & depth_img,
-                                    // const cv::Mat & label_img,
                                     const cv::Mat & normal_img)
 {
     // RCLCPP_INFO_STREAM(node_->get_logger(), "   [SuperpixelDepthSegmenter::healthCheck]");
@@ -123,10 +102,6 @@ void ImagePreprocessor::healthCheck(const cv::Mat & depth_img,
     int negative_depth_count = 0;
     int finite_depth_count = 0;
     int zero_depth_count = 0;
-
-    // int nan_label_count = 0;
-    // int negative_label_count = 0;
-    // int finite_label_count = 0;
 
     int nan_normal_count = 0;
     int finite_normal_count = 0;
@@ -158,21 +133,6 @@ void ImagePreprocessor::healthCheck(const cv::Mat & depth_img,
                 finite_depth_count++;
             }
 
-            // uint8_t label = label_img.at<uint8_t>(r, c);
-
-            // if (std::isnan(label))
-            // {
-            //     RCLCPP_WARN_STREAM_EXPRESSION(node_->get_logger(), nan_label_count == 0, "            Detected NaN label pixel"); //  at: (" << r << ", " << c << "), zeroing ...");
-            //     nan_label_count++;
-            // } else if (label < 0)
-            // {
-            //     RCLCPP_WARN_STREAM_EXPRESSION(node_->get_logger(), negative_label_count == 0, "            Detected negative label pixel"); //  at: (" << r << ", " << c << "), zeroing ...");
-            //     negative_label_count++;
-            // } else
-            // {
-            //     finite_label_count++;
-            // }
-
             cv::Vec3f normal = normal_img.at<cv::Vec3f>(r, c);
 
             if (std::isnan(normal.val[0]) || std::isnan(normal.val[1]) || std::isnan(normal.val[2]))
@@ -199,11 +159,6 @@ void ImagePreprocessor::healthCheck(const cv::Mat & depth_img,
     RCLCPP_INFO_STREAM(node_->get_logger(), "               Zero count: " << zero_depth_count);
     RCLCPP_INFO_STREAM(node_->get_logger(), "               Finite count: " << finite_depth_count);
     RCLCPP_INFO_STREAM(node_->get_logger(), "               Unaccounted for: " << total_pixels - (nan_depth_count + negative_depth_count + zero_depth_count + finite_depth_count));
-    // RCLCPP_INFO_STREAM(node_->get_logger(), "        Label:");
-    // RCLCPP_INFO_STREAM(node_->get_logger(), "               NaN count: " << nan_label_count);
-    // RCLCPP_INFO_STREAM(node_->get_logger(), "               Negative count: " << negative_label_count);
-    // RCLCPP_INFO_STREAM(node_->get_logger(), "               Finite count: " << finite_label_count);
-    // RCLCPP_INFO_STREAM(node_->get_logger(), "               Unaccounted for: " << total_pixels - (nan_label_count + negative_label_count + finite_label_count));
     RCLCPP_INFO_STREAM(node_->get_logger(), "        Normal:");
     RCLCPP_INFO_STREAM(node_->get_logger(), "               NaN count: " << nan_normal_count);
     RCLCPP_INFO_STREAM(node_->get_logger(), "               Zero count: " << zero_normal_count);
@@ -218,10 +173,8 @@ void ImagePreprocessor::healthCheck(const cv::Mat & depth_img,
 }
 
 void ImagePreprocessor::preprocessImages(const cv::Mat & cleaned_depth_img,
-                                            // const cv::Mat & cleaned_label_img,
                                             const cv::Mat & cleaned_normal_img,
                                             cv::Mat & preprocessed_depth_img,
-                                            // cv::Mat & preprocessed_label_img,
                                             cv::Mat & preprocessed_normal_img)
 {
     // RCLCPP_INFO_STREAM(node_->get_logger(), "   [SuperpixelDepthSegmenter::preprocessImages]");
@@ -229,28 +182,18 @@ void ImagePreprocessor::preprocessImages(const cv::Mat & cleaned_depth_img,
     if (params_.kernel_radius_ < 1)
     {
         preprocessed_depth_img = cleaned_depth_img.clone();
-        // preprocessed_label_img = cleaned_label_img.clone();
         preprocessed_normal_img = cleaned_normal_img.clone();
         return;
     }
 
-    // Custom dilation implementation
-    // float max_depth = -std::numeric_limits<float>::max();
-    // int max_label = 0;
-    // cv::Vec3f max_normal(0, 0, 0);
-    // cv::Point max_depth_pixel(-1, -1);
-
     float min_depth = std::numeric_limits<float>::max();
-    // int min_label = 0;
     cv::Vec3f min_normal(0, 0, 0);
     cv::Point min_depth_pixel(-1, -1);
 
     cv::Mat dilated_depth_img = cleaned_depth_img.clone(); // cv::Mat(cleaned_depth_img.size(), CV_32F, cv::Scalar(0));
-    // cv::Mat dilated_label_img = cleaned_label_img.clone(); // cv::Mat(cleaned_label_img.size(), CV_8UC1, cv::Scalar(0));
     cv::Mat dilated_normal_img = cleaned_normal_img.clone(); // cv::Mat(cleaned_normal_img.size(), CV_32FC3, cv::Scalar(0));
 
     cv::Mat temp_dilated_depth_img = cv::Mat(cleaned_depth_img.size(), CV_32F, cv::Scalar(0));
-    // cv::Mat temp_dilated_label_img = cv::Mat(cleaned_label_img.size(), CV_8UC1, cv::Scalar(0));
     cv::Mat temp_dilated_normal_img = cv::Mat(cleaned_normal_img.size(), CV_32FC3, cv::Scalar(0));
 
     int new_r = 0;
@@ -264,13 +207,7 @@ void ImagePreprocessor::preprocessImages(const cv::Mat & cleaned_depth_img,
         {
             for (int c = 0; c < cleaned_depth_img.cols; c++)
             {
-                // max_depth = 0;
-                // max_label = 0;
-                // max_normal = cv::Vec3f(0, 0, 0);
-                // max_depth_pixel = cv::Point(-1, -1);
-
                 min_depth = std::numeric_limits<float>::max();
-                // min_label = 0;
                 min_normal = cv::Vec3f(0, 0, 0);
                 min_depth_pixel = cv::Point(-1, -1);
 
@@ -291,41 +228,21 @@ void ImagePreprocessor::preprocessImages(const cv::Mat & cleaned_depth_img,
                         if (depth > 0.0 && depth < min_depth)
                         {
                             min_depth = depth;
-                            // min_label = dilated_label_img.at<uint8_t>(new_r, new_c);
                             min_normal = dilated_normal_img.at<cv::Vec3f>(new_r, new_c);
                             min_depth_pixel = cv::Point(new_c, new_r);
                             temp_dilated_depth_img.at<float>(r, c) = min_depth;
-                            // temp_dilated_label_img.at<uint8_t>(r, c) = min_label;
                             temp_dilated_normal_img.at<cv::Vec3f>(r, c) = min_normal;                            
                         }
-
-                        // if (depth > max_depth)
-                        // {
-                        //     max_depth = depth;
-                        //     max_label = dilated_label_img.at<uint8_t>(new_r, new_c);
-                        //     max_normal = dilated_normal_img.at<cv::Vec3f>(new_r, new_c);
-                        //     max_depth_pixel = cv::Point(new_c, new_r);
-                        // }
                     }
                 }
-
-                // temp_dilated_depth_img.at<float>(r, c) = max_depth;
-                // temp_dilated_label_img.at<uint8_t>(r, c) = max_label;
-                // temp_dilated_normal_img.at<cv::Vec3f>(r, c) = max_normal;
-
-                // temp_dilated_depth_img.at<float>(r, c) = min_depth;
-                // temp_dilated_label_img.at<uint8_t>(r, c) = min_label;
-                // temp_dilated_normal_img.at<cv::Vec3f>(r, c) = min_normal;
             }
         }
 
         dilated_depth_img = temp_dilated_depth_img.clone();
-        // dilated_label_img = temp_dilated_label_img.clone();
         dilated_normal_img = temp_dilated_normal_img.clone();
     }
 
     preprocessed_depth_img = dilated_depth_img.clone();
-    // preprocessed_label_img = dilated_label_img.clone();
     preprocessed_normal_img = dilated_normal_img.clone();
 
     // RCLCPP_INFO_STREAM(node_->get_logger(), "       Comparing normal image to dilated normal image ...");
@@ -353,13 +270,10 @@ void ImagePreprocessor::preprocessImages(const cv::Mat & cleaned_depth_img,
     // }    
 }
 
-//                                     const cv_bridge::CvImagePtr & raw_depth_img_ptr
 void ImagePreprocessor::fillInImage(const cv::Mat & cleaned_depth_img,
-                                    // const cv::Mat & cleaned_label_img,
                                     const cv::Mat & cleaned_normal_img,
                                     const cv::Mat & visited,
                                     cv::Mat & filled_depth_img,
-                                    // cv::Mat & filled_label_img,
                                     cv::Mat & filled_normal_img,
                                     const double & default_height)
 {
@@ -376,9 +290,6 @@ void ImagePreprocessor::fillInImage(const cv::Mat & cleaned_depth_img,
 
     // Depth
     filled_depth_img = cleaned_depth_img.clone();
-
-    // Labels
-    // filled_label_img = cleaned_label_img.clone();
 
     // Normals
     filled_normal_img = cleaned_normal_img.clone();
@@ -420,7 +331,6 @@ void ImagePreprocessor::fillInImage(const cv::Mat & cleaned_depth_img,
                     // RCLCPP_INFO_STREAM(node_->get_logger(), "       did not find a pixel, filling in at (" << r << ", " << c << ") ...");
 
                     filled_depth_img.at<float>(r, c) = default_height + distribution(generator);
-                    // filled_label_img.at<uint8_t>(r, c) = 3;
                     filled_normal_img.at<cv::Vec3f>(r, c) = cv::Vec3f(0, -1.0, 0);
                 } else
                 {

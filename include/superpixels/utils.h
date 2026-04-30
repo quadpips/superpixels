@@ -126,7 +126,6 @@ inline bool isDepthValid(const cv::Mat & depth_image,
 }
 
 inline bool isPixelValid(const cv::Mat & depth_image, 
-                            // const cv::Mat & label_image,
                             const cv::Mat & normal_image,
                             const cv::Point & pixel,
                             const int & k_c)
@@ -158,18 +157,6 @@ inline bool isPixelValid(const cv::Mat & depth_image,
     {
         return false;
     }
-
-    ///////////
-    // LABEL //
-    ///////////
-
-    // uint8_t label = label_image.at<uint8_t>(pixel.y, pixel.x);
-
-    // if (std::isnan(label) || label < 0)
-    // {
-    //     RCLCPP_WARN_STREAM(node_->get_logger(), "Passing depth check but failing label check.");
-    //     return false;
-    // }
 
     ////////////
     // NORMAL //

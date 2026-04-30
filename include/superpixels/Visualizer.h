@@ -101,14 +101,10 @@ class Visualizer
 
         // Publishers
         image_transport::Publisher fin_depth_img_pub_;
-        // image_transport::Publisher fin_label_img_pub_;
         image_transport::Publisher fin_normal_img_pub_;
         image_transport::Publisher center_grid_img_pub_;
         image_transport::Publisher colored_cluster_img_pub_;        
 
-        // ros::Publisher colored_point_cloud_pub_;
-        // ros::Publisher colored_centroids_pub_;
-        // ros::Publisher terrainPub_;
         rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr colored_point_cloud_pub_;
         rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr colored_centroids_pub_;
         rclcpp::Publisher<convex_plane_decomposition_msgs::msg::PlanarTerrain>::SharedPtr terrainPub_;
@@ -121,12 +117,10 @@ class Visualizer
         int priorPlanarRegionsNormalSize = 0;
         int priorPlanarRegionsIDSize = 0;
 
-        // cv_bridge::CvImagePtr cluster_img_ptr_ = nullptr;
         cv_bridge::CvImagePtr center_grid_img_ptr_ = nullptr;
         cv_bridge::CvImagePtr colored_cluster_img_ptr_ = nullptr;
 
         cv_bridge::CvImagePtr fin_depth_img_ptr_ = nullptr;
-        // cv_bridge::CvImagePtr fin_label_img_ptr_ = nullptr;
         cv_bridge::CvImagePtr fin_normal_img_ptr_ = nullptr;
         cv_bridge::CvImagePtr fin_normal_img_colored_ptr_ = nullptr;
 

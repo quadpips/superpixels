@@ -27,16 +27,6 @@ int main(int argc, char** argv)
     // serverCallback = boost::bind(&SuperpixelDepthSegmenter::reconfigureCallback, superpixel_segmenter, _1, _2);
     // server.setCallback(serverCallback);
     
-    // to visualize regions 
-    // if (terrain_receiver)
-    // {
-    //     RCLCPP_INFO_STREAM(nodePtr->get_logger(), "Terrain receiver is enabled. Will visualize regions.");
-    //     switched_model::SegmentedPlanesTerrainModelRos * terrain_model = new switched_model::SegmentedPlanesTerrainModelRos(nodePtr);
-
-    // } else
-    // {
-    //     RCLCPP_INFO_STREAM(nodePtr->get_logger(), "Terrain receiver is disabled. Will not visualize regions.");
-    // }
 
     while (rclcpp::ok())
     {
@@ -45,8 +35,6 @@ int main(int argc, char** argv)
 
         // Visualize outputs
         superpixel_segmenter.visualize();
-
-        // superpixel_segmenter.log();
 
         rclcpp::spin_some(nodePtr);
         loop_rate.sleep();
