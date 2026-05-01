@@ -28,7 +28,7 @@ superpixel_depth_segmentation_node:
     num_iterations: 5
 
     # Rough number of superpixels to generate over image
-    num_superpixels: 150
+    num_superpixels: 175
 
     # Flag for warm-starting superpixel regions 
     warm_start: false
